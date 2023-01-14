@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
 	"log"
 	"net/http"
 	"os"
@@ -11,12 +11,14 @@ import (
 	gogpt "github.com/sashabaranov/go-gpt3"
 )
 
-// Define a home handler function which writes a byte slice containing
-// "Hello from Snippetbox" as the response body.
+// health is a simple health check handler.
 func health(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Hello from Adyant's Open AI GPT Test API"))
+	p := "Hello from Adyant's Open AI GPT Test API"
+	json.NewEncoder(w).Encode(p)
 }
 
+// openAI is a simple handler that calls the Open AI API
 func openAI(w http.ResponseWriter, r *http.Request) {
 	godotenv.Load()
 
@@ -41,6 +43,8 @@ func openAI(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	fmt.Println(resp.Choices[0].Text)
-	w.Write([]byte(resp.Choices[0].Text))
+	out := GPTResponse{Response: resp.Choices[0].Text[2:], Good: true}
+	// fmt.Println(resp.Choices[0].Text[2:])
+	// w.Write([]byte(resp.Choices[0].Text[2:]))
+	json.NewEncoder(w).Encode(out)
 }
